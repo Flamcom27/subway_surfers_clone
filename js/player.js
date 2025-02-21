@@ -1,9 +1,3 @@
-// 1 loadCharacter
-// 2 animateCharacter
-//      a. running
-//      b. dying
-//      c. jumping/falling
-// 3. addController
 import *  as THREE from "three";
 import * as TWEEN from "tween";
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
@@ -30,6 +24,7 @@ export default class Player {
         this.clips = {};
         this.isMoving = false
         this.isJumping = false
+        this.isAlive = true;
         let _this = this;
 
         loader.load(path, function (model) {
@@ -67,7 +62,7 @@ export default class Player {
         const x = this.model.position.x
         const targetX = x+direction
 
-        if (Math.abs(targetX) <= 30 && !this.isMoving){
+        if (Math.abs(targetX) <= 30 && !this.isMoving && this.isAlive){
             this.isMoving = !this.isMoving
             const tween = new TWEEN.Tween({ x: x })
             .to({ x: targetX }, 250)
@@ -82,7 +77,7 @@ export default class Player {
         }
     }
     jump(){
-        if (!this.isJumping){
+        if (!this.isJumping && this.isAlive){
             this.isJumping = !this.isJumping
             this.clips.jumpAnimation.setLoop( THREE.LoopOnce )
             this.clips.jumpAnimation.stop()
@@ -112,14 +107,17 @@ export default class Player {
         }
     }
     move(){
-        this.model.position.z += 0.7
-        console.info("player checkbox position: ", this.checkBox)
-        // this.checkBox.copy( this.model.children[1].geometry ).applyMatrix4( this.model.matrixWorld )
-        this.checkBox.setFromObject(this.model)
-        // console.log(this.model.position )
-        // console.log(this.checkBox)
+        if (this.isAlive){
+            this.model.position.z += 0.7
+            console.info("player checkbox position: ", this.checkBox)
+            // this.checkBox.copy( this.model.children[1].geometry ).applyMatrix4( this.model.matrixWorld )
+            this.checkBox.setFromObject(this.model)
+            // console.log(this.model.position )
+            // console.log(this.checkBox)
+    
+            console.info("player position: ", this.model.position)
+        }
 
-        console.info("player position: ", this.model.position)
     }
     onKeyDown(event) {
         console.info(`key ${event.key} is pressed`)
@@ -136,6 +134,12 @@ export default class Player {
 
         }
     }
+    die(){
+        this.isAlive = false
+        this.clips.runAnimation.stop()
+        this.clips.dieAnimation.play()
+        document.getElementById("restart").style.visibility = "visible"
+    }
     _loadAnimations() {
         const animations = [["dieAnimation", 'dying.fbx'], ["runAnimation", 'fast_run.fbx'], ["jumpAnimation", 'jumping.fbx']]
         this.mixer = new THREE.AnimationMixer(this.model);
@@ -148,7 +152,12 @@ export default class Player {
                         _this.clips.runAnimation.play()
                         break;
                     case "jumpAnimation":
-                        _this.clips.jumpAnimation.setDuration(1.4)
+                        _this.clips.jumpAnimation.setDuration(1.4);
+                        break;
+                    case "dieAnimation":
+                        _this.clips.dieAnimation.setLoop( THREE.LoopOnce )
+                        _this.clips.dieAnimation.clampWhenFinished = true;
+                        break;
                         
                 }
             })

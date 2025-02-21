@@ -3,11 +3,12 @@ import *  as THREE from "three";
 // import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+import Car from "./car.js";
 
 const sleep = m => new Promise(r => setTimeout(r, m))
 
-const houseObjLoader = new OBJLoader();
-const carObjLoader = new OBJLoader();
+const objLoader = new OBJLoader();
+
 // const fbxLoader = new FBXLoader();
 const mtlLoader = new MTLLoader();
 
@@ -34,11 +35,11 @@ roadModel.position.y = 0;
 roadModel.rotation.x = Math.PI / 2;
 roadModel.rotateZ(Math.PI / 2);
 mtlLoader.load("./assets/models/house/house.mtl", function (mtl) {
-    houseObjLoader.setMaterials(mtl)
+    objLoader.setMaterials(mtl)
 })
 let leftHouseModel; 
 let rightHouseModel; 
-houseObjLoader.load("./assets/models/house/house.obj", function (obj) {
+objLoader.load("./assets/models/house/house.obj", function (obj) {
     obj.scale.setScalar(2);
     obj.traverse((c) => {
         c.castShadow = true;
@@ -57,49 +58,53 @@ houseObjLoader.load("./assets/models/house/house.obj", function (obj) {
 });
 
 
-let carModel;
-mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
-    carObjLoader.setMaterials(mtl)
-})
+// let carModel;
+// mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
+//     carObjLoader.setMaterials(mtl)
+// })
 
-carObjLoader.load("./assets/models/car/Car.obj", (obj) => {
-    obj.scale.setScalar(6.5);
-    obj.traverse((c) => {
-        c.castShadow = true;
-    });
-    obj.position.x = 0
-    console.log(obj)
-    obj.rotateY(Math.PI)
+// carObjLoader.load("./assets/models/car/Car.obj", (obj) => {
+//     obj.scale.setScalar(6.5);
+//     obj.traverse((c) => {
+//         c.castShadow = true;
+//     });
+//     obj.position.x = 0
+//     console.log(obj)
+//     obj.rotateY(Math.PI)
 
-})
+// })
 
 export default class Obstacle {
     static groups = [];
-    static models = {
-        road: roadModel,
-        car: carModel,
-        rightHouse: rightHouseModel,
-        leftHouse: leftHouseModel
-    }
-    constructor(type, z){
+    static cars = [];
+    // static models = {
+    //     road: roadModel,
+    //     rightHouse: rightHouseModel,
+    //     leftHouse: leftHouseModel
+    // }
+    constructor(type, z, scene=undefined){
         let model;
         switch (type){
             case ENUM.ROAD:
                 model = roadModel.clone();
+                model.position.z += z
                 break;
             case ENUM.RIGHT_HOUSE:
                 model = rightHouseModel.clone();
+                model.position.z += z
                 break;
             case ENUM.LEFT_HOUSE:
                 model = leftHouseModel.clone();
+                model.position.z += z
                 break;
             case ENUM.CAR:
-                model = carModel.clone();
+                model = new Car(z, scene)
+                console.log(model)
                 break;
             default:
                 throw `type ${type} doesn't exist`       
         }
-        model.position.z += z
+
 
         return model
     }
@@ -140,6 +145,11 @@ export default class Obstacle {
 
         if ( lastZ - playerZ < 500 ) {
             Obstacle.createGroup( lastZ+50, playerZ, scene )
+            if (Math.random() < 25){
+                const car = new Obstacle(ENUM.CAR, lastZ+50, scene)
+                Obstacle.cars.push(car)
+            }
+
             await sleep(500)
             const firstZ = Obstacle._getGroupZ(0)
             if (playerZ - firstZ > 50){
@@ -147,6 +157,11 @@ export default class Obstacle {
                 scene.remove(firstGroup)
             }
             Obstacle.generateGroups(lastZ+50,  playerZ, scene )
+        }
+    }
+    static updateCars(player){
+        for (let car of Obstacle.cars){
+            car.move(player)
         }
     }
 }

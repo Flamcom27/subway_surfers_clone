@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+// import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+// import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import Player from "./player.js";
 import Obstacle from "./obstacle.js";
 
@@ -20,44 +19,44 @@ scene.add(light);
 
 const player = new Player("models/player/player.fbx", scene, camera);
 
-const mtlLoader = new MTLLoader()
+// const mtlLoader = new MTLLoader()
 
 camera.rotateZ(Math.PI / 2);
 
 
 
-const newLoader = new OBJLoader();
-mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
-    newLoader.setMaterials(mtl)
-})
-let car;
-let carCheckBox;
-newLoader.load("./assets/models/car/Car.obj", (obj) => {
-    obj.scale.setScalar(6);
-    obj.traverse((c) => {
-        c.castShadow = true;
-    });
-    // obj.getObjectByName("Body")
-    let checkBox = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() )
-    checkBox.setFromObject(obj)
-    car = obj
-    carCheckBox = checkBox
-    obj.position.x -=10
-    obj.position.z += 100
-    console.log(obj)
-    obj.rotateY(Math.PI)
-    scene.add(obj)
-})
-function moveCar(){
-    car.position.z -= 0.07
-    carCheckBox.setFromObject(car)
-}
+// const newLoader = new OBJLoader();
+// mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
+//     newLoader.setMaterials(mtl)
+// })
+// let car;
+// let carCheckBox;
+// // newLoader.load("./assets/models/car/Car.obj", (obj) => {
+//     obj.scale.setScalar(6);
+//     obj.traverse((c) => {
+//         c.castShadow = true;
+//     });
+//     // obj.getObjectByName("Body")
+//     let checkBox = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() )
+//     checkBox.setFromObject(obj)
+//     car = obj
+//     carCheckBox = checkBox
+//     obj.position.x -=10
+//     obj.position.z += 100
+//     console.log(obj)
+//     obj.rotateY(Math.PI)
+//     scene.add(obj)
+// })
+// function moveCar(){
 
-function checkCollision() {
-    if (carCheckBox.intersectsBox(player.checkBox)){
-        console.log("collision")
-    }
-}
+// }
+
+// function checkCollision() {
+//     if (carCheckBox.intersectsBox(player.checkBox)){
+//         player.die()
+//         console.log("collision")
+//     }
+// }
 
 
 const renderer = new THREE.WebGLRenderer();
@@ -88,8 +87,6 @@ let start = false;
 btn.addEventListener("click", (e) => {
     start = true
     btn.style.visibility = "hidden"
-
-
 });
 
 
@@ -135,17 +132,14 @@ async function animate() {
             activated = false
     }
         if ( start ) {
-            moveCar()
+            // moveCar()
             player.move()
-            checkCollision()
+            // checkCollision()
             updateCamera()
+            Obstacle.updateCars(player)
         }   
 }
-    // if (player.clips.jump && !activated){
-    //     // console.log(player.clips )
-    //     activated = true
-    //     player.clips.jump.play()
-    // }
+
     const delta = clock.getDelta();
     if (player.mixer) {
         player.mixer.update(delta);
