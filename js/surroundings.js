@@ -127,10 +127,12 @@ export default class Surroundings {
             Surroundings.generateGroups(lastZ + 50, playerZ, scene);
         }
     }
-    static updateCars(player) {
-        console.log(Surroundings.cars);
+    static updateCars(player, scene) {
         for (let car of Surroundings.cars) {
             car.move(player);
+            if (player.model.position.z - car.model.position.z > 50){
+                scene.remove(car.model)
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-// import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Player from "./player.js";
 import Surroundings from "./surroundings.js";
 
@@ -28,9 +28,9 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-// const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.y = 30;
-// controls.update();
+controls.update();
 
 document.body.appendChild(renderer.domElement);
 
@@ -66,7 +66,7 @@ async function animate() {
         if (start) {
             player.move();
             updateCamera();
-            Surroundings.updateCars(player);
+            Surroundings.updateCars(player, scene);
         }
     }
     const delta = clock.getDelta();
