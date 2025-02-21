@@ -8,8 +8,6 @@ import Car from "./car.js";
 const sleep = m => new Promise(r => setTimeout(r, m))
 
 const objLoader = new OBJLoader();
-
-// const fbxLoader = new FBXLoader();
 const mtlLoader = new MTLLoader();
 
 const ENUM = Object.freeze({
@@ -24,7 +22,7 @@ const roadTexture = new THREE.TextureLoader().load(
 );
 const roadModel = new THREE.Mesh(
     new THREE.PlaneGeometry(50, 80),
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshPhongMaterial({
         color: 0xffffff,
         side: THREE.DoubleSide,
         map: roadTexture,
@@ -42,7 +40,10 @@ let rightHouseModel;
 objLoader.load("./assets/models/house/house.obj", function (obj) {
     obj.scale.setScalar(2);
     obj.traverse((c) => {
-        c.castShadow = true;
+        if (c.isMesh) {
+            c.castShadow = true;
+            c.receiveShadow = true
+        }
     });
     obj.children[0].material.opacity = 100
     obj.children[0].material.side = THREE.DoubleSide
@@ -58,30 +59,9 @@ objLoader.load("./assets/models/house/house.obj", function (obj) {
 });
 
 
-// let carModel;
-// mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
-//     carObjLoader.setMaterials(mtl)
-// })
-
-// carObjLoader.load("./assets/models/car/Car.obj", (obj) => {
-//     obj.scale.setScalar(6.5);
-//     obj.traverse((c) => {
-//         c.castShadow = true;
-//     });
-//     obj.position.x = 0
-//     console.log(obj)
-//     obj.rotateY(Math.PI)
-
-// })
-
 export default class Obstacle {
     static groups = [];
     static cars = [];
-    // static models = {
-    //     road: roadModel,
-    //     rightHouse: rightHouseModel,
-    //     leftHouse: leftHouseModel
-    // }
     constructor(type, z, scene=undefined){
         let model;
         switch (type){
@@ -99,19 +79,15 @@ export default class Obstacle {
                 break;
             case ENUM.CAR:
                 model = new Car(z, scene)
-                console.log(model)
+
                 break;
             default:
                 throw `type ${type} doesn't exist`       
         }
-
-
         return model
     }
     static createGroup( startZ, playerZ, scene ){
-        // console.log(startZ - playerZ)
         
-        console.log(startZ - playerZ)
         let group = new THREE.Group();
 
         const models = [
@@ -159,9 +135,14 @@ export default class Obstacle {
             Obstacle.generateGroups(lastZ+50,  playerZ, scene )
         }
     }
-    static updateCars(player){
+    static updateCars(player, scene){
+        console.log(Obstacle.cars)
         for (let car of Obstacle.cars){
             car.move(player)
+            console.log(player.model.position.z - car.model.position.z)
+            if (player.model.position.z - car.model.position.z > 50){
+                scene.remove( car )
+            }
         }
     }
 }

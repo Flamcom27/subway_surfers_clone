@@ -40,21 +40,13 @@ export default class Player {
             camera.position.x = model.position.x
             camera.lookAt( new THREE.Vector3(model.position.x, model.position.y+25, model.position.z ));
             _this.checkBox = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() )
-            // _this.checkBox.setFromObject(model)
             scene.add(model);
-
             _this._loadAnimations();
             document.addEventListener("keydown", _this.onKeyDown.bind(_this))
-            // console.log(Player.instance)
-            // console.log(_this)
-            // _this.model.add(_this.checkBox)
-            // const box = new THREE.BoxHelper( _this.checkBox, 0xffff00 );
-            // scene.add( box );
             console.log(_this.model.matrixWorld )
             console.log(_this.model)
             
         });
-        // console.log(this)
     }
 
     changeSide(direction){
@@ -71,7 +63,6 @@ export default class Player {
             })
             .onComplete( () => { 
                 this.isMoving = !this.isMoving
-                console.info(`player moves to x: ${targetX}`) 
             });
             tween.start()
         }
@@ -109,18 +100,11 @@ export default class Player {
     move(){
         if (this.isAlive){
             this.model.position.z += 0.7
-            console.info("player checkbox position: ", this.checkBox)
-            // this.checkBox.copy( this.model.children[1].geometry ).applyMatrix4( this.model.matrixWorld )
             this.checkBox.setFromObject(this.model)
-            // console.log(this.model.position )
-            // console.log(this.checkBox)
-    
-            console.info("player position: ", this.model.position)
         }
 
     }
     onKeyDown(event) {
-        console.info(`key ${event.key} is pressed`)
         switch (event.key) {
             case "a":
                 this.changeSide(20);
@@ -131,7 +115,6 @@ export default class Player {
             case " ":
                 this.jump();
                 break;
-
         }
     }
     die(){

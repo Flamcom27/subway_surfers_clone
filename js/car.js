@@ -14,7 +14,11 @@ mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
 objLoader.load("./assets/models/car/Car.obj", (obj) => {
     obj.scale.setScalar(6.5);
     obj.traverse((c) => {
-        c.castShadow = true;
+        if (c.isMesh) {
+            c.castShadow = true;
+            c.receiveShadow = true
+        }
+
     });
     obj.position.x -= 10
     console.log(obj)
