@@ -21,89 +21,43 @@ scene.add(light);
 const player = new Player("models/player/player.fbx", scene, camera);
 
 const mtlLoader = new MTLLoader()
-// mtlLoader.load("./assets/models/house/house.mtl", function (mtl) {
-//     loader.setMaterials(mtl)
-// }
 
-// )
-// const roadTexture = new THREE.TextureLoader().load(
-//     "./assets/textures/road.jpeg"
-// );
-// const plane = new THREE.Mesh(
-//     new THREE.PlaneGeometry(50, 80),
-//     new THREE.MeshStandardMaterial({
-//         color: 0xffffff,
-//         side: THREE.DoubleSide,
-//         map: roadTexture,
-//     })
-// );
-
-// plane.position.y = 0;
-// plane.rotation.x = Math.PI / 2;
-// scene.add(plane);
-// plane.rotateZ(Math.PI / 2);
 camera.rotateZ(Math.PI / 2);
 
 
-
-// let rightHouse; 
-// let leftHouse;
-// loader.load("./assets/models/house/house.obj", function (fbx) {
-//     fbx.scale.setScalar(2);
-//     fbx.traverse((c) => {
-//         c.castShadow = true;
-
-        
-//     });
-
-//     fbx.children[0].material.opacity = 100
-//     fbx.children[0].material.side = THREE.DoubleSide
-
-//     scene.add(fbx);
-
-//     console.log(fbx)
-
-//     fbx.position.y = 0;
-//     fbx.position.x = plane.position.x +279
-//     fbx.position.z = plane.position.z -13
-//     leftHouse = fbx
-//     const fbx2 = fbx.clone()
-//     scene.add(fbx2);
-//     fbx2.position.x -=558;
-//     fbx2.position.z +=27;
-//     fbx2.rotateY(Math.PI);
-//     rightHouse = fbx2
-
-
-// });
 
 const newLoader = new OBJLoader();
 mtlLoader.load("./assets/models/car/Car.mtl", function (mtl) {
     newLoader.setMaterials(mtl)
 })
-
+let car;
+let carCheckBox;
 newLoader.load("./assets/models/car/Car.obj", (obj) => {
-    obj.scale.setScalar(7);
+    obj.scale.setScalar(6);
     obj.traverse((c) => {
         c.castShadow = true;
     });
-    obj.getObjectByName("Body")
-    obj.position.x = 0
+    // obj.getObjectByName("Body")
+    let checkBox = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() )
+    checkBox.setFromObject(obj)
+    car = obj
+    carCheckBox = checkBox
+    obj.position.x -=10
+    obj.position.z += 100
     console.log(obj)
     obj.rotateY(Math.PI)
     scene.add(obj)
 })
+function moveCar(){
+    car.position.z -= 0.07
+    carCheckBox.setFromObject(car)
+}
 
-// setTimeout(() => {
-//     const models = [plane, leftHouse, rightHouse]
-//     for (let i=1; i<10;i++){
-//         for (const model of models){
-//             let newModel = model.clone()
-//             newModel.position.z+=i*50
-//             scene.add(newModel)
-//         }
-//     }
-// }, 500)
+function checkCollision() {
+    if (carCheckBox.intersectsBox(player.checkBox)){
+        console.log("collision")
+    }
+}
 
 
 const renderer = new THREE.WebGLRenderer();
@@ -171,52 +125,21 @@ function updateCamera() {
 
 const clock = new THREE.Clock();
 let activated = false;
-let lastZ;
 async function animate() {
     
 
     if ( player.model ) {
-        if (!activated){
+        if ( !activated ){
             activated = true
-            // let z;
-            // // console.log("obstacle groups length: ", Obstacle.groups.length)
-            // if (Obstacle.groups.length === 0 ){
-            //     z = player.model.position.z-50
-            // } else {
-
-                
-            //     // console.log( lastIndex )
-            //     const lastObject =  Obstacle.groups[ lastIndex ]
-            //     // console.info( "last object position: ", lastObject.position.z )
-            //     z = lastObject.position.z
-            // }
-            // if (Obstacle.groups.length !== 0){
-            //     const lastIndex = Obstacle.groups.length-1
-            //     const lastObject =  Obstacle.groups[ lastIndex ].children[0]
-            //     console.info( "last object position: ", lastObject.position.z )
-            //     lastZ = lastObject.position.z
-            // } else {
-            //     lastZ = -50
-            // }
             await Obstacle.generateGroups(0, player.model.position.z, scene)
             activated = false
-        // }
-        // const lastIndex = Obstacle.groups.length-1
-        // if ( lastIndex === -1 ){
-        //     z = 0
-        //     Obstacle.createGroup(z, player.model.position.z, scene)
-        // } else if ( Obstacle.groups[lastIndex].children[0].position.z - player.model.position.z < 500 ) {
-        //     z += 50
-        //     Obstacle.createGroup(z, player.model.position.z, scene)
-        // }
-
     }
         if ( start ) {
-            player.model.position.z += 0.7
+            moveCar()
+            player.move()
+            checkCollision()
             updateCamera()
-        }
-
-   
+        }   
 }
     // if (player.clips.jump && !activated){
     //     // console.log(player.clips )

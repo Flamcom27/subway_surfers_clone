@@ -44,37 +44,25 @@ export default class Player {
             camera.position.z = model.position.z-50
             camera.position.x = model.position.x
             camera.lookAt( new THREE.Vector3(model.position.x, model.position.y+25, model.position.z ));
+            _this.checkBox = new THREE.Box3( new THREE.Vector3(), new THREE.Vector3() )
+            // _this.checkBox.setFromObject(model)
             scene.add(model);
 
             _this._loadAnimations();
             document.addEventListener("keydown", _this.onKeyDown.bind(_this))
             // console.log(Player.instance)
             // console.log(_this)
+            // _this.model.add(_this.checkBox)
+            // const box = new THREE.BoxHelper( _this.checkBox, 0xffff00 );
+            // scene.add( box );
+            console.log(_this.model.matrixWorld )
+            console.log(_this.model)
             
         });
         // console.log(this)
     }
-    _loadAnimations() {
-        const animations = [["die", 'dying.fbx'], ["run", 'fast_run.fbx'], ["jump", 'jumping.fbx']]
-        this.mixer = new THREE.AnimationMixer(this.model);
-        let _this = this
-        for (let animation of animations) {
-            loader.load("animations/" + animation[1], function (anim) {
-                _this.clips[animation[0]] = _this.mixer.clipAction(anim.animations[0]);
-                switch (animation[0]){
-                    case "run":
-                        _this.clips.run.play()
-                        break;
-                    case "jump":
-                        _this.clips.jump.setDuration(1)
-                        
-                }
-            })
-        }
 
-
-    }
-    _move(direction){
+    changeSide(direction){
 
         const x = this.model.position.x
         const targetX = x+direction
@@ -93,23 +81,23 @@ export default class Player {
             tween.start()
         }
     }
-    _jump(){
+    jump(){
         if (!this.isJumping){
             this.isJumping = !this.isJumping
-            this.clips.jump.setLoop( THREE.LoopOnce )
-            this.clips.jump.stop()
-            this.clips.jump.play()
+            this.clips.jumpAnimation.setLoop( THREE.LoopOnce )
+            this.clips.jumpAnimation.stop()
+            this.clips.jumpAnimation.play()
             const y = this.model.position.y
             const targetY = y+25
             const tween = new TWEEN.Tween({ y: y })
-            .to({ y: targetY }, 500)
+            .to({ y: targetY }, 700)
             .onUpdate(coords => {
                 this.model.position.y = coords.y
             })
             .easing(TWEEN.Easing.Quadratic.Out)
             .onComplete( () => { 
                 const tween = new TWEEN.Tween({ y: targetY })
-                .to({ y: y }, 500)
+                .to({ y: y }, 700)
                 .onUpdate(coords => {
                     this.model.position.y = coords.y
                 })
@@ -122,24 +110,48 @@ export default class Player {
             });
             tween.start()
         }
-
-        
     }
+    move(){
+        this.model.position.z += 0.7
+        console.info("player checkbox position: ", this.checkBox)
+        // this.checkBox.copy( this.model.children[1].geometry ).applyMatrix4( this.model.matrixWorld )
+        this.checkBox.setFromObject(this.model)
+        // console.log(this.model.position )
+        // console.log(this.checkBox)
 
+        console.info("player position: ", this.model.position)
+    }
     onKeyDown(event) {
         console.info(`key ${event.key} is pressed`)
-        // const targetPosition = Player.instance.model.position.clone()
         switch (event.key) {
             case "a":
-                this._move(20);
+                this.changeSide(20);
                 break;
             case "d":
-                this._move(-20);
+                this.changeSide(-20);
                 break;
             case " ":
-                this._jump();
+                this.jump();
                 break;
 
+        }
+    }
+    _loadAnimations() {
+        const animations = [["dieAnimation", 'dying.fbx'], ["runAnimation", 'fast_run.fbx'], ["jumpAnimation", 'jumping.fbx']]
+        this.mixer = new THREE.AnimationMixer(this.model);
+        let _this = this
+        for (let animation of animations) {
+            loader.load("animations/" + animation[1], function (anim) {
+                _this.clips[animation[0]] = _this.mixer.clipAction(anim.animations[0]);
+                switch (animation[0]){
+                    case "runAnimation":
+                        _this.clips.runAnimation.play()
+                        break;
+                    case "jumpAnimation":
+                        _this.clips.jumpAnimation.setDuration(1.4)
+                        
+                }
+            })
         }
     }
 }
