@@ -17,9 +17,6 @@ function animate() {
 animate();
 
 
-
-// console.log("tween", TWEEN)
-
 let loader = new FBXLoader()
 loader.setPath('./assets/')
 
