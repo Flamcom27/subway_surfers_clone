@@ -1,7 +1,7 @@
 import * as THREE from "three";
 // import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Player from "./player.js";
-import Obstacle from "./obstacle.js";
+import Surroundings from "./surroundings.js";
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -60,13 +60,13 @@ async function animate() {
     if (player.model) {
         if (!activated) {
             activated = true;
-            await Obstacle.generateGroups(0, player.model.position.z, scene);
+            await Surroundings.generateGroups(0, player.model.position.z, scene);
             activated = false;
         }
         if (start) {
             player.move();
             updateCamera();
-            Obstacle.updateCars(player);
+            Surroundings.updateCars(player);
         }
     }
     const delta = clock.getDelta();

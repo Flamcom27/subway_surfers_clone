@@ -56,7 +56,7 @@ objLoader.load("./assets/models/house/house.obj", function (obj) {
     rightHouseModel = obj2;
 });
 
-export default class Obstacle {
+export default class Surroundings {
     static groups = [];
     static cars = [];
     constructor(type, z, scene = undefined) {
@@ -86,22 +86,22 @@ export default class Obstacle {
     static createGroup(startZ, playerZ, scene) {
         let group = new THREE.Group();
         const models = [
-            new Obstacle(ENUM.ROAD, startZ),
-            new Obstacle(ENUM.RIGHT_HOUSE, startZ),
-            new Obstacle(ENUM.LEFT_HOUSE, startZ),
+            new Surroundings(ENUM.ROAD, startZ),
+            new Surroundings(ENUM.RIGHT_HOUSE, startZ),
+            new Surroundings(ENUM.LEFT_HOUSE, startZ),
         ];
         for (let model of models) {
             group.add(model);
         }
         scene.add(group);
-        Obstacle.groups.push(group);
+        Surroundings.groups.push(group);
         console.info("group position: ", group.position);
-        console.info("groups: ", Obstacle.groups);
+        console.info("groups: ", Surroundings.groups);
         return group;
     }
     static _getGroupZ(index) {
-        if (Obstacle.groups.length !== 0) {
-            const lastObject = Obstacle.groups[index].children[0];
+        if (Surroundings.groups.length !== 0) {
+            const lastObject = Surroundings.groups[index].children[0];
             return lastObject.position.z;
         } else {
             return -50;
@@ -109,27 +109,27 @@ export default class Obstacle {
     }
 
     static async generateGroups(lastZ, playerZ, scene) {
-        lastZ = Obstacle._getGroupZ(Obstacle.groups.length - 1);
+        lastZ = Surroundings._getGroupZ(Surroundings.groups.length - 1);
 
         if (lastZ - playerZ < 500) {
-            Obstacle.createGroup(lastZ + 50, playerZ, scene);
+            Surroundings.createGroup(lastZ + 50, playerZ, scene);
             if (Math.random() < 25) {
-                const car = new Obstacle(ENUM.CAR, lastZ + 50, scene);
-                Obstacle.cars.push(car);
+                const car = new Surroundings(ENUM.CAR, lastZ + 50, scene);
+                Surroundings.cars.push(car);
             }
 
             await sleep(500);
-            const firstZ = Obstacle._getGroupZ(0);
+            const firstZ = Surroundings._getGroupZ(0);
             if (playerZ - firstZ > 50) {
-                let firstGroup = Obstacle.groups.shift();
+                let firstGroup = Surroundings.groups.shift();
                 scene.remove(firstGroup);
             }
-            Obstacle.generateGroups(lastZ + 50, playerZ, scene);
+            Surroundings.generateGroups(lastZ + 50, playerZ, scene);
         }
     }
     static updateCars(player) {
-        console.log(Obstacle.cars);
-        for (let car of Obstacle.cars) {
+        console.log(Surroundings.cars);
+        for (let car of Surroundings.cars) {
             car.move(player);
         }
     }
