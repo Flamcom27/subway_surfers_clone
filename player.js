@@ -36,7 +36,7 @@ export default class Player {
 
         loader.load(path, function (model) {
 
-            model.scale.setScalar(0.1);
+            model.scale.setScalar(0.06);
 
             model.traverse(c => {
                 c.castShadow = true;
@@ -130,7 +130,7 @@ export default class Player {
 
     onKeyDown(event) {
         console.info(`key ${event.key} is pressed`)
-        const targetPosition = Player.instance.model.position.clone()
+        // const targetPosition = Player.instance.model.position.clone()
         switch (event.key) {
             case "a":
                 this._move(20);
